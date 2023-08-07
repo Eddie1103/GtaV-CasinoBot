@@ -1,13 +1,17 @@
+import pyautogui
 import time
 
 _amount = 1000
 
 def startup():
-    print("Starting...")
-    time.sleep(30)
+    print("Casino-Bot is starting...")
+    moveMouseTo(100, 100)
+    exit()
+
 
 def moveMouseTo(x, y):
-    print("")
+    pyautogui.moveTo(100, 100, duration = 5)
+    print("debug: mouse moved to ({x}, {y})")
 
 
 if __name__ == "__main__":
