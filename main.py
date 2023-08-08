@@ -7,16 +7,27 @@ _betCounter = 1
 def startup():
     print("Casino-Bot is starting...")
     
+    while(True):
+        while(findBetField() == False):
+            print("Konnte Tisch nicht finden...")
+            time.sleep(5)
+
+        while(detectWinOrLose() == False):
+            print("Runde läuft momentan...")
+            time.sleep(2)
     exit()
 
 def findBetField():
     x, y= pyautogui.locateCenterOnScreen("redbet.png", region=(980,630,100,60))
-    pyautogui.moveTo(x, y, duration = 3)
-    pyautogui.press("tab")
-    time.sleep(0.5)
-    for i in range(_betCounter):
-        pyautogui.leftClick()
-        time.sleep(1)
+    if x != None:
+        pyautogui.moveTo(x, y, duration = 3)
+        pyautogui.press("tab")
+        time.sleep(0.5)
+        for i in range(_betCounter):
+            pyautogui.leftClick()
+            time.sleep(1)
+        return True
+    return False
 
 def detectWinOrLose():
     x, y= pyautogui.locateCenterOnScreen("win.png", region=(0,0,370,90))
@@ -28,8 +39,6 @@ def detectWinOrLose():
             _betCounter+1
     else:
         _betCounter = 1
-    #e region=(0,0,370,90)
-    print("")
     return True
 
 def moveMouseTo(x, y):
