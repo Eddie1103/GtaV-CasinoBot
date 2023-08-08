@@ -2,6 +2,7 @@ import pyautogui
 import time, os
 from screenSize import GetScreenSize
 from directkeys import PressKey, ReleaseKey, TAB
+from screenshot import Screen
 from pynput import mouse
 
 _betCounter = 1
@@ -83,18 +84,8 @@ def findBetField():
         return False
 
 def detectWinOrLose():
-    try:
-        x, y= pyautogui.locateCenterOnScreen("pics/win.png")
-        _betCounter = 1
-        print("Gewonnen! Bet-Counter auf 1 gesetzt")
-    except:
-        try:
-            x,y = pyautogui.locateCenterOnScreen("pics/lose.png")
-            _betCounter*=2
-            print("Verloren! Bet-Counter verdoppelt auf " + _betCounter)
-        except:
-            return False
-    return True
+    text = Screen().get_text(40, 25, SCREEN_SIZE[0] / 3, 250)
+    print(text)
 
 def moveMouseTo(x, y):
     pyautogui.moveTo(100, 100, duration = 5)
@@ -102,6 +93,8 @@ def moveMouseTo(x, y):
 
 
 if __name__ == "__main__":
+    detectWinOrLose()
+    exit()
     startup()
 
 #maus auf rot -> max einsatz -> einsatz-counter abarbeiten (place orders)
