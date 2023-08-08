@@ -36,7 +36,7 @@ def detectWinOrLose():
         if x == None:
             return False
         else:
-            _betCounter+1
+            _betCounter*2
     else:
         _betCounter = 1
     return True
