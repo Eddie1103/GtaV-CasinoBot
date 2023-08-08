@@ -1,3 +1,4 @@
+import requests
 import pyautogui
 import time, os
 from screenSize import GetScreenSize
@@ -9,6 +10,7 @@ _betCounter = 1
 SCREEN_SIZE = GetScreenSize()
 SCREEN_STRING = str(SCREEN_SIZE[0]) + "x" + str(SCREEN_SIZE[1])
 OFFSET_SIZE = 90
+API_URL = 'https://ocr.k0ntr4.de/extract_text'
 
 def startup():
     if os.path.exists("pics/bet" + SCREEN_STRING + ".png") == False:
@@ -84,8 +86,12 @@ def findBetField():
         return False
 
 def detectWinOrLose():
-    text = Screen().get_text(40, 25, SCREEN_SIZE[0] / 3, 250)
-    print(text)
+    #text = Screen().take_screenshot(40, 25, SCREEN_SIZE[0] / 3, 250)
+    # Load the image file
+    image_file = {'image': ('image.png', open('pics/img.png', 'rb'))}
+    # Send the POST request
+    response = requests.post(API_URL, files=image_file)
+    print(response.json())
 
 def moveMouseTo(x, y):
     pyautogui.moveTo(100, 100, duration = 5)
