@@ -2,7 +2,7 @@ import requests
 import pyautogui
 import time, os
 from screenSize import GetScreenSize
-from directkeys import PressKey, ReleaseKey, TAB
+from directkeys import PressKey, ReleaseKey, TAB, UP
 from screenshot import Screen
 from pynput import mouse
 
@@ -22,10 +22,24 @@ def startup():
         while(findBetField() == False):
             print("Konnte Tisch nicht finden...")
             time.sleep(5)
-        exit()
+
         while(detectWinOrLose() == False):
             print("Runde läuft momentan...")
             time.sleep(2)
+
+def ratingApiReturn(value):
+    global _betCounter
+    value = value["text"]
+    if "gewonnen" in value.lower():
+        #hier zurücksetzen
+        _betCounter = 1
+        print("Gewonnen! Bet-Counter auf 1 gesetzt")
+        return True
+    elif "verloren" in value.lower():
+        _betCounter *= 2
+        print("Verloren! Bet-Counter verdoppelt auf " + str(_betCounter))
+        return True
+    return False
 
 def get_jetons_coords():
     coords = pyautogui.locateCenterOnScreen(f'pics/jetons{SCREEN_STRING}.png', confidence=0.8)
@@ -59,10 +73,12 @@ def get_direction_coords(coordsJetons, coords):
     return offset
 
 def findBetField():
+    global _betCounter
     try:
         coords = pyautogui.locateCenterOnScreen(f'pics/bet{SCREEN_STRING}.png', confidence=0.8)
         if coords == None:
             return False
+        print("Tisch gefunden!")
         coordsJetons = get_jetons_coords()
         while not check_if_coords_match_with_offset(coordsJetons, coords, 30):
             offset = get_direction_coords(coordsJetons, coords)
@@ -73,9 +89,18 @@ def findBetField():
             coordsJetons = get_jetons_coords()
             if coordsJetons == None:
                 return False
-        PressKey(TAB)
-        time.sleep(0.5)
-        ReleaseKey(TAB)
+
+        #max einsatz
+        #PressKey(TAB)
+        #time.sleep(0.5)
+        #ReleaseKey(TAB)
+
+        #2->500 3->1000 4->5000 5->10000
+        for i in range(3):
+            PressKey(UP)
+            time.sleep(0.05)
+            ReleaseKey(UP)
+
         for i in range(_betCounter):
             mouse.Controller().press(mouse.Button.left)
             time.sleep(0.1)
@@ -86,12 +111,13 @@ def findBetField():
         return False
 
 def detectWinOrLose():
-    #text = Screen().take_screenshot(40, 25, SCREEN_SIZE[0] / 3, 250)
+    Screen().take_screenshot(40, 25, SCREEN_SIZE[0] / 3, 250)
     # Load the image file
     image_file = {'image': ('image.png', open('pics/img.png', 'rb'))}
     # Send the POST request
     response = requests.post(API_URL, files=image_file)
     print(response.json())
+    return ratingApiReturn(response.json())
 
 def moveMouseTo(x, y):
     pyautogui.moveTo(100, 100, duration = 5)
@@ -99,8 +125,6 @@ def moveMouseTo(x, y):
 
 
 if __name__ == "__main__":
-    detectWinOrLose()
-    exit()
     startup()
 
 #maus auf rot -> max einsatz -> einsatz-counter abarbeiten (place orders)
