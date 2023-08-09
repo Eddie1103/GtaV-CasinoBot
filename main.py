@@ -30,19 +30,27 @@ def startup():
 def ratingApiReturn(value):
     global _betCounter
     value = value["text"]
-    if "gewonnen" in value.lower():
+    if "gewonnen" in value.lower() or "win" in value.lower():
         #hier zurücksetzen
         _betCounter = 1
         print("Gewonnen! Bet-Counter auf 1 gesetzt")
         return True
-    elif "verloren" in value.lower():
+    elif "verloren" in value.lower() or "lose" in value.lower():
         _betCounter *= 2
         print("Verloren! Bet-Counter verdoppelt auf " + str(_betCounter))
         return True
     return False
 
 def get_jetons_coords():
-    coords = pyautogui.locateCenterOnScreen(f'pics/jetons{SCREEN_STRING}.png', confidence=0.8)
+    view = None
+    if SCREEN_SIZE == (1920, 1080):
+        view = (700, 120, 1700, 900)
+    elif SCREEN_SIZE == (2560, 1440):
+        view = (850, 170, 2300, 1100)
+    if view:
+        coords = pyautogui.locateCenterOnScreen(f'pics/jetons{SCREEN_STRING}.png', confidence=0.8, region=view)
+    else:
+        coords = pyautogui.locateCenterOnScreen(f'pics/jetons{SCREEN_STRING}.png', confidence=0.8)
     return coords
 
 def get_bet_coords():
@@ -89,6 +97,7 @@ def findBetField():
             coordsJetons = get_jetons_coords()
             if coordsJetons == None:
                 return False
+            print(currentMousePos, coords, coordsJetons)
 
         #max einsatz
         #PressKey(TAB)
