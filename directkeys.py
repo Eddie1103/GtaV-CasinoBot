@@ -4,6 +4,8 @@ import time
 SendInput = ctypes.windll.user32.SendInput
 
 TAB = 0x0F
+UP = 0xC8
+
 
 # C struct redefinitions
 PUL = ctypes.POINTER(ctypes.c_ulong)
