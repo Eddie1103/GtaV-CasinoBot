@@ -1,6 +1,7 @@
 import requests
 import pyautogui
 import time, os
+from datetime import datetime
 from screenSize import GetScreenSize
 from directkeys import PressKey, ReleaseKey, TAB, UP
 from screenshot import Screen
@@ -9,22 +10,23 @@ from pynput import mouse
 _betCounter = 1
 SCREEN_SIZE = GetScreenSize()
 SCREEN_STRING = str(SCREEN_SIZE[0]) + "x" + str(SCREEN_SIZE[1])
-OFFSET_SIZE = 90
+#offset -> 1920x1080=45 | 144p=90
+OFFSET_SIZE = 45
 API_URL = 'https://ocr.k0ntr4.de/extract_text'
 
 def startup():
     if os.path.exists("pics/bet" + SCREEN_STRING + ".png") == False:
-        print("Kein Referenzbild für aktuelle Screen-Size gefunden: " + SCREEN_STRING +"px")
+        writeToLogAndConsole("Kein Referenzbild für aktuelle Screen-Size gefunden: " + SCREEN_STRING +"px")
         exit()
-    print("Casino-Bot is starting...")
+    writeToLogAndConsole("Casino-Bot is starting...")
 
     while(True):
         while(findBetField() == False):
-            print("Konnte Tisch nicht finden...")
+            writeToLogAndConsole("Konnte Tisch nicht finden...")
             time.sleep(5)
 
         while(detectWinOrLose() == False):
-            print("Runde läuft momentan...")
+            writeToLogAndConsole("Runde läuft momentan...")
             time.sleep(2)
 
 def ratingApiReturn(value):
@@ -33,11 +35,11 @@ def ratingApiReturn(value):
     if "gewonnen" in value.lower() or "win" in value.lower():
         #hier zurücksetzen
         _betCounter = 1
-        print("Gewonnen! Bet-Counter auf 1 gesetzt")
+        writeToLogAndConsole("Gewonnen! Bet-Counter auf 1 gesetzt")
         return True
     elif "verloren" in value.lower() or "lose" in value.lower():
         _betCounter *= 2
-        print("Verloren! Bet-Counter verdoppelt auf " + str(_betCounter))
+        writeToLogAndConsole("Verloren! Bet-Counter verdoppelt auf " + str(_betCounter))
         return True
     return False
 
@@ -86,7 +88,7 @@ def findBetField():
         coords = pyautogui.locateCenterOnScreen(f'pics/bet{SCREEN_STRING}.png', confidence=0.8)
         if coords == None:
             return False
-        print("Tisch gefunden!")
+        writeToLogAndConsole("Tisch gefunden!")
         coordsJetons = get_jetons_coords()
         while not check_if_coords_match_with_offset(coordsJetons, coords, 30):
             offset = get_direction_coords(coordsJetons, coords)
@@ -97,12 +99,7 @@ def findBetField():
             coordsJetons = get_jetons_coords()
             if coordsJetons == None:
                 return False
-            print(currentMousePos, coords, coordsJetons)
-
-        #max einsatz
-        #PressKey(TAB)
-        #time.sleep(0.5)
-        #ReleaseKey(TAB)
+            writeToLogAndConsole(currentMousePos, coords, coordsJetons)
 
         #2->500 3->1000 4->5000 5->10000
         for i in range(3):
@@ -125,17 +122,17 @@ def detectWinOrLose():
     image_file = {'image': ('image.png', open('pics/img.png', 'rb'))}
     # Send the POST request
     response = requests.post(API_URL, files=image_file)
-    print(response.json())
+    writeToLogAndConsole(response.json())
     return ratingApiReturn(response.json())
 
 def moveMouseTo(x, y):
     pyautogui.moveTo(100, 100, duration = 5)
-    print("debug: mouse moved to ({x}, {y})")
+    writeToLogAndConsole("debug: mouse moved to ({x}, {y})")
 
+def writeToLogAndConsole(text):
+    f = open("log.txt", "a")
+    f.write("[" + datetime.now().strftime('%d-%m-%Y %H:%M:%S') + "]: " + text)
+    f.close()
 
 if __name__ == "__main__":
     startup()
-
-#maus auf rot -> max einsatz -> einsatz-counter abarbeiten (place orders)
-#detection for win/lose -> einsatz-counter verdoppeln oder zurücksetzen
-
