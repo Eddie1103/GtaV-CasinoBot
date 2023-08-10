@@ -7,6 +7,10 @@ from directkeys import PressKey, ReleaseKey, TAB, UP
 from screenshot import Screen
 from pynput import mouse
 
+#stats
+
+
+#settings
 _betCounter = 1
 SCREEN_SIZE = GetScreenSize()
 SCREEN_STRING = str(SCREEN_SIZE[0]) + "x" + str(SCREEN_SIZE[1])
@@ -15,6 +19,7 @@ OFFSET_SIZE = 45
 API_URL = 'https://ocr.k0ntr4.de/extract_text'
 
 def startup():
+    readStats()
     if os.path.exists("pics/bet" + SCREEN_STRING + ".png") == False:
         writeToLogAndConsole("Kein Referenzbild für aktuelle Screen-Size gefunden: " + SCREEN_STRING +"px")
         exit()
@@ -33,13 +38,19 @@ def ratingApiReturn(value):
     global _betCounter
     value = value["text"]
     if "gewonnen" in value.lower() or "win" in value.lower():
-        #hier zurücksetzen
         _betCounter = 1
         writeToLogAndConsole("Gewonnen! Bet-Counter auf 1 gesetzt")
+        #winCounter hochsetzen
+        #stats schreiben
         return True
     elif "verloren" in value.lower() or "lose" in value.lower():
+        if _betCounter>50000:
+            _betCounter = 1
+            writeToLogAndConsole("Verloren! STOP-LOSS -> Einsatz wurde zurückgesetzt.")    
         _betCounter *= 2
         writeToLogAndConsole("Verloren! Bet-Counter verdoppelt auf " + str(_betCounter))
+        #winCounter hochsetzen
+        #stats schreiben
         return True
     return False
 
@@ -134,6 +145,12 @@ def writeToLogAndConsole(text):
     f = open("log.txt", "a")
     f.write("[" + datetime.now().strftime('%d.%m.%Y %H:%M:%S') + "]: " + text)
     f.close()
+
+def readStats():
+    print("reading stats")
+
+def writeStats():
+    print("write stats")
 
 if __name__ == "__main__":
     startup()
