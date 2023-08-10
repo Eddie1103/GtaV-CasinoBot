@@ -130,8 +130,9 @@ def moveMouseTo(x, y):
     writeToLogAndConsole("debug: mouse moved to ({x}, {y})")
 
 def writeToLogAndConsole(text):
+    print(text)
     f = open("log.txt", "a")
-    f.write("[" + datetime.now().strftime('%d-%m-%Y %H:%M:%S') + "]: " + text)
+    f.write("[" + datetime.now().strftime('%d.%m.%Y %H:%M:%S') + "]: " + text)
     f.close()
 
 if __name__ == "__main__":
